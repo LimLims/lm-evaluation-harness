@@ -1,0 +1,17 @@
+task: eqbenchv2
+dataset_path: sam-paech/test3
+dataset_name: null
+output_type: multiple_choice
+training_split: null
+validation_split: null
+test_split: test
+doc_to_text: !function results.doc_to_text
+doc_to_target: !function results.doc_to_target
+doc_to_choice: !function results.doc_to_choice
+process_results: !function results.process_eqbench_results
+metric_list:
+  - metric: !function results.process_question
+    aggregation: !function results.aggregate_scores
+    higher_is_better: true  
+metadata:
+  version: 1.0

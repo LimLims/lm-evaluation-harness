@@ -1,53 +1,23 @@
 import numpy as np
 import math
-def _process_question(predictions, references):  # This is a passthrough function
-    string_label = ["entailment", "contradiction", "neutral"]
-    predictions = (
-        string_label.index(predictions[0]) if predictions[0] in string_label else 0
-    )
-    references = string_label.index(references[0])
-
-    return (predictions, references)
 
 def doc_to_text(doc):
-    if doc['source'] == 'winogrande_xl':
-        idx = doc["query"].index("_")
-        return doc["query"][:idx].strip()
-    elif doc['source'].startswith('mmlu'):
-        choices = doc['choices']
-        category = doc['source'][5:].replace('-', ' ')
-        prepend_str = 'The following are multiple choice questions (with answers) about '+category+'\n\n'
-        return prepend_str + doc['query'].strip() + '\nA. ' + choices[0] + '\nB. ' + choices[1] + '\nC. ' + choices[2] + '\nD. ' + choices[3] + '\nAnswer:'
-    elif doc['source'].startswith('agieval'):
-        return doc['query']
-
+    return doc['query']
 
 def doc_to_target(doc):
-    if doc['source'] == 'winogrande_xl':
-        return doc['gold']
-    elif doc['source'].startswith('mmlu'):
-        return doc['gold']
-    elif doc['source'].startswith('agieval'):
-        return doc['gold']
-
+    return doc['gold']
 
 def doc_to_choice(doc):
-    if doc['source'] == 'winogrande_xl':
-        idx = doc["query"].index("_") + 1
-        options = [doc["choices"][0][4:], doc["choices"][1][4:]]
-        return [opt + doc["query"][idx:] for opt in options]
-    elif doc['source'].startswith('mmlu'):
-        return ["A", "B", "C", "D"]
-    elif doc['source'].startswith('agieval'):
-        return doc['choices']
+    return doc['choices']
 
 def calc_score_for_question(pred, gold):
+    print('XXX')
     # Implementing the scoring system from here:
     # https://github.com/EQ-bench/EQ-Bench/blob/main_v2_0/lib/scoring.py
 
     # Except with the slight variation that we are calculating each of
     # the 4 parts of each question individually.
-    
+
     diff = abs(pred-gold)
     if diff == 0:
         scaled_diff = 0
@@ -62,11 +32,14 @@ def calc_score_for_question(pred, gold):
     # this constant was calculated so that answering randomly on
     # the whole test produces a score of zero.
     adjust_const =  0.7477
+    score = 10 - scaled_diff * adjust_const
+    print('score:', score)
 
-    return 10 - scaled_diff * adjust_const
+    return score
 	
 
 def process_question_acc(doc, results):
+    print('YYY')
     lls, is_greedy = zip(*results)
 
     # retrieve choices in List[str] form, to compute choice lengths, etc.
@@ -80,6 +53,7 @@ def process_question_acc(doc, results):
     return acc
 
 def process_question_acc_norm(doc, results):
+    print('ZZZ')
     lls, is_greedy = zip(*results)
 
     # retrieve choices in List[str] form, to compute choice lengths, etc.
@@ -92,10 +66,14 @@ def process_question_acc_norm(doc, results):
 
     return acc_norm
 
-
-def aggregate_scores(items):    
+import json
+def aggregate_scores(items):
+    print('AAA')
     # This is effectively replicating the original scoring system here:
     # https://github.com/EQ-bench/EQ-Bench/blob/main_v2_0/lib/scoring.py
+    with open('test.out', 'w') as f:
+        json.dump(items, f)
+    #print(items)
 
     # Except here we've processed the 4 parts for each question individually,
     # so the score tallying looks a little different.

@@ -5,15 +5,15 @@ output_type: multiple_choice
 training_split: null
 validation_split: null
 test_split: test
-doc_to_text: !function results.doc_to_text
-doc_to_target: !function results.doc_to_target
-doc_to_choice: !function results.doc_to_choice
+doc_to_text: !function eqbench_processing.doc_to_text
+doc_to_target: !function eqbench_processing.doc_to_target
+doc_to_choice: !function eqbench_processing.doc_to_choice
 metric_list:
-  - metric: !function results.process_question_acc
-    aggregation: !function results.aggregate_scores
+  - metric: acc
+    aggregation: mean
     higher_is_better: true  
-  - metric: !function results.process_question_acc_norm
-    aggregation: !function results.aggregate_scores
+  - metric: acc_norm
+    aggregation: mean
     higher_is_better: true 
 metadata:
   version: 1.0

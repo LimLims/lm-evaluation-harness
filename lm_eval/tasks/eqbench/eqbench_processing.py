@@ -11,7 +11,6 @@ def doc_to_choice(doc):
     return doc['choices']
 
 def calc_score_for_question(pred, gold):
-    print('XXX')
     # Implementing the scoring system from here:
     # https://github.com/EQ-bench/EQ-Bench/blob/main_v2_0/lib/scoring.py
 
@@ -32,19 +31,17 @@ def calc_score_for_question(pred, gold):
     # this constant was calculated so that answering randomly on
     # the whole test produces a score of zero.
     adjust_const =  0.7477
-    score = 10 - scaled_diff * adjust_const
-    print('score:', score)
+    score = round(10 - scaled_diff * adjust_const, 4)
+    #print('score:', score)
 
     return score
 	
 
 def process_question_acc(doc, results):
-    print('YYY')
     lls, is_greedy = zip(*results)
 
     # retrieve choices in List[str] form, to compute choice lengths, etc.
     choices = doc_to_choice(doc)
-    completion_len = np.array([float(len(i)) for i in choices])
 
     pred = np.argmax(lls)
     gold = doc_to_target(doc)    
@@ -53,12 +50,11 @@ def process_question_acc(doc, results):
     return acc
 
 def process_question_acc_norm(doc, results):
-    print('ZZZ')
     lls, is_greedy = zip(*results)
 
     # retrieve choices in List[str] form, to compute choice lengths, etc.
     choices = doc_to_choice(doc)
-    completion_len = np.array([float(len(i)) for i in choices])
+    completion_len = np.array([float(len(str(i))) for i in choices])
 
     pred_norm = np.argmax(lls / completion_len)
     gold = doc_to_target(doc)    
@@ -66,16 +62,23 @@ def process_question_acc_norm(doc, results):
 
     return acc_norm
 
-import json
 def aggregate_scores(items):
-    print('AAA')
     # This is effectively replicating the original scoring system here:
     # https://github.com/EQ-bench/EQ-Bench/blob/main_v2_0/lib/scoring.py
-    with open('test.out', 'w') as f:
-        json.dump(items, f)
-    #print(items)
+    #with open('test.out', 'w') as f:
+    #    json.dump(items, f)
+    print(items)
 
     # Except here we've processed the 4 parts for each question individually,
     # so the score tallying looks a little different.
-    acc = (sum(items) - ((len(items) / 4) * 30)) / (len(items) / 4)
+    acc = 10 * (sum(items) - ((len(items) / 4) * 30)) / (len(items) / 4)
     return acc
+
+def process_results_mcqa(doc, results):
+    acc = process_question_acc(doc, results)
+    #acc_norm = process_question_acc_norm(doc, results)
+
+    return {
+        "eqbenchv2": acc,
+        #"eqbenchv2_norm": acc_norm,
+    }

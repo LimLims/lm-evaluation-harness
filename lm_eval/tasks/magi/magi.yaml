@@ -1,5 +1,5 @@
-task: wam_hard
-dataset_path: sam-paech/test2
+task: magi
+dataset_path: sam-paech/magi_1_0
 dataset_name: null
 output_type: multiple_choice
 training_split: null
